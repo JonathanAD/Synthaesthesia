@@ -26,18 +26,18 @@ class OrganGFX {
   }
   void display() {
   
-//  //Mask
-//  blendMode(ADD);
-//  translate(OX, OY, OZ);
-//  rotateX(PI/8);
-//  beginShape();
-//    texture(OT);
-//    vertex(-100, -100, 0, 0,   0);
-//    vertex( 100, -100, 0, 512, 0);
-//    vertex( 100,  100, 0, 512, 512);
-//    vertex(-100,  100, 0, 0,   512);
-//  endShape();
-//  blendMode(BLEND);
+  //Mask
+  blendMode(ADD);
+  translate(OX, OY, OZ);
+  rotateX(PI/8);
+  beginShape();
+    texture(OT);
+    vertex(-100, -100, 0, 0,   0);
+    vertex( 100, -100, 0, 512, 0);
+    vertex( 100,  100, 0, 512, 512);
+    vertex(-100,  100, 0, 0,   512);
+  endShape();
+  blendMode(BLEND);
   }
 }
 

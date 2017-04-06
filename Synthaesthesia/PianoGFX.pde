@@ -28,6 +28,7 @@ class PianoGFX {
   
   //Mask
   blendMode(ADD);
+  tint(255,255,255, PA);  
   translate(PX, PY, PZ);
 //  scale(1, 8,1);
   beginShape();
