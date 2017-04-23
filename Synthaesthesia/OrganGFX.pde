@@ -28,8 +28,10 @@ class OrganGFX {
   
   //Mask
   blendMode(ADD);
-  translate(OX, OY, OZ);
-  rotateX(PI/8);
+  tint(255, 255, 255, OA); 
+  scale(1,4,1);
+  translate(OX, OY-100, OZ);
+//  rotateX(PI/8);
   beginShape();
     texture(OT);
     vertex(-100, -100, 0, 0,   0);
@@ -38,6 +40,8 @@ class OrganGFX {
     vertex(-100,  100, 0, 0,   512);
   endShape();
   blendMode(BLEND);
+  translate(-OX, -OY+100, -OZ);
+  scale(1,0.25,1);
   }
 }
 

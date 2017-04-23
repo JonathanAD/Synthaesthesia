@@ -25,23 +25,15 @@ class ChromaticPercussionGFX {
     CPT  = ChromaticPercussionTexture;
   }
   void display() {
-//    noStroke();
-//    colorMode(HSB);
-//    fill(CPHu, CPS, CPB);
-//    rect(CPX, CPY, CPW, CPH);
-
-//    colorMode(HSB);
-////    fill(PHu, PS, PB);
-//    noFill();
-//    strokeWeight(2);
-//    stroke(CPHu, CPS, CPB);
-//    translate(CPX, CPY, CPD);
-//    box(CPW, CPH, CPD);
 
 //Mask
-  blendMode(ADD);
+  //Blending mode
+  //Color
+  tint(255, 255, 255, CPA); 
+  //General translation
   translate(CPX, CPY, CPZ);
   
+  //Front face
   beginShape();
     texture(CPT);
     vertex(-100, -100, 0, 0,   0);
@@ -49,7 +41,17 @@ class ChromaticPercussionGFX {
     vertex( 100,  100, 0, 512, 512);
     vertex(-100,  100, 0, 0,   512);
   endShape();
+  
+  translate(0, 0, -100);
+  beginShape();
+    texture(CPT);
+    vertex(-100, -100, 0, 0,   0);
+    vertex( 100, -100, 0, 512, 0);
+    vertex( 100,  100, 0, 512, 512);
+    vertex(-100,  100, 0, 0,   512);
+  endShape();
+  translate(0, 0, 100);
+  
   translate(-CPX, -CPY, -CPZ);
-  blendMode(BLEND);
   }
 }
