@@ -36,21 +36,39 @@ class ChromaticPercussionGFX {
   //Front face
   beginShape();
     texture(CPT);
-    vertex(-100, -100, 0, 0,   0);
-    vertex( 100, -100, 0, 512, 0);
-    vertex( 100,  100, 0, 512, 512);
-    vertex(-100,  100, 0, 0,   512);
+    vertex(-50, -200, 0, 0,   0);
+    vertex( 50, -200, 0, 512, 0);
+    vertex( 50,  200, 0, 512, 512);
+    vertex(-50,  200, 0, 0,   512);
   endShape();
   
-  translate(0, 0, -100);
+//  translate(0, 0, -100);
+//  beginShape();
+//    texture(CPT);
+//    vertex(-100, -100, 0, 0,   0);
+//    vertex( 100, -100, 0, 512, 0);
+//    vertex( 100,  100, 0, 512, 512);
+//    vertex(-100,  100, 0, 0,   512);
+//  endShape();
+//  translate(0, 0, 100);
+
   beginShape();
     texture(CPT);
-    vertex(-100, -100, 0, 0,   0);
-    vertex( 100, -100, 0, 512, 0);
-    vertex( 100,  100, 0, 512, 512);
-    vertex(-100,  100, 0, 0,   512);
+    vertex(-50, -200, -100, 0,   0);
+    vertex( 50, -200, -100, 512, 0);
+    vertex( 50,  200, -100, 512, 512);
+    vertex(-50,  200, -100, 0,   512);
   endShape();
-  translate(0, 0, 100);
+  
+//  rotateX(radians(90));
+//  beginShape();
+//    texture(CPT);
+//    vertex(-100, -100, 0, 0,   0);
+//    vertex( 100, -100, 0, 512, 0);
+//    vertex( 100,  100, 0, 512, 512);
+//    vertex(-100,  100, 0, 0,   512);
+//  endShape();
+//  rotateX(radians(90));
   
   translate(-CPX, -CPY, -CPZ);
   }
