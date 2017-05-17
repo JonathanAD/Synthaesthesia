@@ -1,8 +1,13 @@
 //Synthesthesia
 //MIDI music visualizer
 //By Jonathan Arias
-//MIDIBus by sparks        - http://www.smallbutdigital.com/themidibus.php
-//Starfield 3D by JimBrown - https://www.processing.org/discourse/beta/num_1209965886.html
+
+//Credits:
+//MIDIBus                   - by sparks               - http://www.smallbutdigital.com/themidibus.php
+//Starfield 3D              - by JimBrown             - https://www.processing.org/discourse/beta/num_1209965886.html
+//Textured cylinder formula - Ben Fry and Casey Reas  - https://processing.org/examples/texturecylinder.html
+//Sine wave formula         - Ben Fry and Casey Reas  - https://processing.org/examples/sinewave.html
+//Smoke texture (Modified)  - by Alexandre W (MorZar) - https://www.flickr.com/photos/morzar/3308117071                - License https://creativecommons.org/licenses/by/2.0/
 
 //Import libraries
 import themidibus.*;  //MIDI interface bridge
@@ -28,7 +33,7 @@ import camera3D.*;
   EnsembleGFX            ensemblegfx           ;  //Ensemble graphics          
   //BrassGFX               brassgfx              ;  //Brass graphics       
   //ReedGFX                reedgfx               ;  //Reed graphics      
-  //PipeGFX                pipegfx               ;  //Pipe graphics      
+  PipeGFX                pipegfx               ;  //Pipe graphics      
   //SynthLeadGFX           synthleadgfx          ;  //Synth Lead graphics           
   //SynthPadGFX            synthpadgfx           ;  //Synth Pad graphics          
   //SynthEffectsGFX        ethnicgfx       ;  //Synth Effects graphics              
@@ -60,12 +65,13 @@ import camera3D.*;
   int[]             Widths = {950, 1280, 1920}; //1/4 1080p [0] | 720p [1] | 1080p [2]
   int[]            Heights = {501,  720, 1080}; //1/4 1080p [0] | 720p [1] | 1080p [2]
   int                Width =         Widths[2]; //Window width
-  int               Height =        Heights[1]; //Window height
+  int               Height =        Heights[2]; //Window height
   boolean         EnableAA =             false; //Anti-aliasing
   boolean     Enable120FPS =             false; //120 frames per second
-  boolean         Enable3D =             true; //Stereoscopic 3D
+  boolean         Enable3D =             false; //Stereoscopic 3D
   int         Divergence3D =                 2; //3D focus point
   boolean EnableFreeCamera =             false; //Mouse-controlled camera     
+  boolean       DumpFrames =             false; //Dump frames to Tiff files
 
 
 //Declare and initialize global variable arrays
@@ -80,7 +86,7 @@ import camera3D.*;
     boolean[] EnsemblePitchIsActive             = new boolean[128];
     //boolean[] BrassPitchIsActive                = new boolean[128];
     //boolean[] ReedPitchIsActive                 = new boolean[128];
-    //boolean[] PipePitchIsActive                 = new boolean[128];
+    boolean[] PipePitchIsActive                 = new boolean[128];
     //boolean[] SynthLeadPitchIsActive            = new boolean[128];
     //boolean[] SynthPadPitchIsActive             = new boolean[128];
     //boolean[] SynthEffectsPitchIsActive         = new boolean[128];
@@ -103,7 +109,7 @@ import camera3D.*;
       float[] EnsemblePitchX                    = new float[128];
       //float[] BrassPitchX                       = new float[128];
       //float[] ReedPitchX                        = new float[128];
-      //float[] PipePitchX                        = new float[128];
+      float[] PipePitchX                        = new float[128];
       //float[] SynthLeadPitchX                   = new float[128];
       //float[] SynthPadPitchX                    = new float[128];
       //float[] SynthEffectsPitchX                = new float[128];
@@ -121,7 +127,7 @@ import camera3D.*;
       float[] EnsembleVelocityY                 = new float[128];
       //float[] BrassVelocityY                    = new float[128];
       //float[] ReedVelocityY                     = new float[128];
-      //float[] PipeVelocityY                     = new float[128];
+      float[] PipeVelocityY                     = new float[128];
       //float[] SynthLeadVelocityY                = new float[128];
       //float[] SynthPadVelocityY                 = new float[128];
       //float[] SynthEffectsVelocityY             = new float[128];
@@ -133,16 +139,20 @@ import camera3D.*;
       float[] PianoVelocityAlpha                = new float[128];
       float[] ChromaticPercussionVelocityAlpha  = new float[128];
       float[] OrganVelocityAlpha                = new float[128];
-      float[] OrganPitchThickness               = new float[128];
+      float[] OrganPitchWidth                   = new float[128];
+      float[] OrganPitchHeight                  = new float[128];
       float[] GuitarVelocityAlpha               = new float[128];
       float[] BassVelocityAlpha                 = new float[128];
       float[] StringsVelocityAlpha              = new float[128];
-      float[] StringsPitchThickness             = new float[128];
+      float[] StringsPitchWidth                 = new float[128];
+      float[] StringsPitchHeight                = new float[128];
       float[] EnsembleVelocityAlpha             = new float[128];
       float[] EnsemblePitchThickness            = new float[128];
       //float[] BrassVelocityAlpha                = new float[128];
       //float[] ReedVelocityAlpha                 = new float[128];
-      //float[] PipeVelocityAlpha                 = new float[128];
+      float[] PipeVelocityAlpha                 = new float[128];
+      float[] PipePitchWidth                    = new float[128];
+      float[] PipePitchHeight                   = new float[128];
       //float[] SynthLeadVelocityAlpha            = new float[128];
       //float[] SynthPadVelocityAlpha             = new float[128];
       //float[] SynthEffectsVelocityAlpha         = new float[128];
@@ -164,14 +174,20 @@ import camera3D.*;
     //Playback       
       float Tempo          =        120; //Speed at which objects will move towards the camera
     //3D       
-      float Depth          =       -750; //3D object starting position
+      float Depth          =      -1000; //3D object starting position
       int   GeometryDetail =         36; //Resolution of 3D objects
     //Constants
       float VibrationUnit  = 0.0009765625; // 1 divided by 128
     //Piano graphics
-      float[] tubeX           = new float[GeometryDetail];
-      float[] tubeY           = new float[GeometryDetail];
+      float[] PianoCylinderX           = new float[GeometryDetail];
+      float[] PianoCylinderY           = new float[GeometryDetail];
       float PianoSpinY        = 0;
+    //Organ graphics
+      float[] OrganCylinderX           = new float[GeometryDetail];
+      float[] OrganCylinderY           = new float[GeometryDetail];
+    //Pipe graphics
+      float[] PipeCylinderX            = new float[GeometryDetail];
+      float[] PipeCylinderY            = new float[GeometryDetail];
     //Color textures
       PImage[] PianoNoteColor               = new PImage[128];
       PImage[] PianoNoteColorSide           = new PImage[128];
@@ -183,7 +199,7 @@ import camera3D.*;
       PImage[] EnsembleNoteColor            = new PImage[128];
       //PImage[] BrassNoteColor               = new PImage[128];
       //PImage[] ReedNoteColor                = new PImage[128];
-      //PImage[] PipeNoteColor                = new PImage[128];
+      PImage[] PipeNoteColor                = new PImage[128];
       //PImage[] SynthLeadNoteColor           = new PImage[128];
       //PImage[] SynthPadNoteColor            = new PImage[128];
       //PImage[] SynthEffectsNoteColor        = new PImage[128];
@@ -202,7 +218,7 @@ import camera3D.*;
     PImage[] EnsembleMask                 = new PImage[60];
     //PImage BrassMask;
     //PImage ReedMask;
-    //PImage PipeMask;
+    PImage[] PipeMask                     = new PImage[60];
     //PImage SynthLeadMask;
     //PImage SynthPadMask;
     //PImage SynthEffectsMask;
@@ -212,6 +228,8 @@ import camera3D.*;
     //PImage PercussionMask;
 
   //Animation
+    //Depth
+      float DepthRate = 2;
     //Vibration
       float SineDiameter      = 10            ;
       float SineAngleConstant = 0.03125       ; 
@@ -221,6 +239,7 @@ import camera3D.*;
       int MaskOrganFrame    = 0;
       int MaskStringsFrame  = 0;
       int MaskEnsembleFrame = 0;
+      int MaskPipeFrame     = 0;
     //Fade out
       float PianoSustainAlpha               = 2;
       float ChromaticPercussionSustainAlpha = 2;
@@ -228,7 +247,7 @@ import camera3D.*;
       float GuitarAmplitudeDecay = 0.99;
       float BassAmplitudeDecay   = 0.99;
     //Sine wave
-      int xspacing = 8                                     ; //How far apart should each horizontal location be spaced
+      int xspacing = 4                                     ; //How far apart should each horizontal location be spaced
       int w = 2048                                         ; //Width of entire wave
       float theta = 0.0                                    ; //Start angle at 0
       float period = 500.0                                 ; //How many pixels before the wave repeats
@@ -239,7 +258,9 @@ import camera3D.*;
       float[] BassAmplitude   = new float[128];            ; //Height of wave
     //Strings bowing orientation
       int StringsBowOrientation = 1                        ; //Bowing orientation. 1=Up | -1=Down
-
+    //Spin
+      int PipeSpin = 0                                     ; //Pipe initial rotation
+      int PipeRotationRate = 6                             ; //Pipe rotation speed
   //Shapes
     //Sky dome
       PImage sky;
@@ -340,10 +361,22 @@ void setup() {
 
 //Shape variables
   //Piano graphics
-    float CylinderAngle = 370.5 / GeometryDetail;
+    float PianoCylinderAngle = 370.5 / GeometryDetail;
     for (int i = 0; i < GeometryDetail; i++) {
-      tubeX[i] = cos(radians(i * CylinderAngle));
-      tubeY[i] = sin(radians(i * CylinderAngle));
+      PianoCylinderX[i] = cos(radians(i * PianoCylinderAngle));
+      PianoCylinderY[i] = sin(radians(i * PianoCylinderAngle));
+    }
+    //Organ graphics
+    float OrganCylinderAngle = 370.5 / GeometryDetail;
+    for (int i = 0; i < GeometryDetail; i++) {
+      OrganCylinderX[i] = cos(radians(i * OrganCylinderAngle));
+      OrganCylinderY[i] = sin(radians(i * OrganCylinderAngle));
+    }
+    //Pipe graphics
+    float PipeCylinderAngle = 370.5 / GeometryDetail;
+    for (int i = 0; i < GeometryDetail; i++) {
+      PipeCylinderX[i] = cos(radians(i * PipeCylinderAngle));
+      PipeCylinderY[i] = sin(radians(i * PipeCylinderAngle));
     }
 
   //Vibration variables
@@ -408,7 +441,7 @@ void draw() {
     EnsembleGFXDisplay();
     //BrassGFXDisplay();
     //ReedGFXDisplay();
-    //PipeGFXDisplay();
+    PipeGFXDisplay();
     //SynthLeadGFXDisplay();
     //SynthPadGFXDisplay();
     //SynthEffectsGFXDisplay();
@@ -427,6 +460,9 @@ void draw() {
     //#Ensemble
     if (MaskEnsembleFrame >= 0 && MaskEnsembleFrame < 59) {MaskEnsembleFrame++;} else {MaskEnsembleFrame = 0;}
     for (int i = 0; i < 128; i++) {EnsembleNoteColor[i].mask(EnsembleMask[MaskEnsembleFrame]);}
+    //#Pipe
+    if (MaskPipeFrame >= 0 && MaskPipeFrame < 59) {MaskPipeFrame++;} else {MaskPipeFrame = 0;}
+    for (int i = 0; i < 128; i++) {PipeNoteColor[i].mask(PipeMask[MaskPipeFrame]);}
   //StringsBowOrientation
     //#Strings
       if (StringsBowOrientation ==   1) {if (MaskStringsFrame == 59) {MaskStringsFrame = 0;} MaskStringsFrame++;} //If StringsBowOrientation equals  1, texture moves upwards
@@ -435,6 +471,13 @@ void draw() {
   //Decrease sine wave amplitude
     for (int i = 0; i < 128; i++) {GuitarAmplitude[i] = GuitarAmplitude[i]*GuitarAmplitudeDecay;} //#Guitar
     for (int i = 0; i < 128; i++) {BassAmplitude[i]   = BassAmplitude[i]  *BassAmplitudeDecay;}   //#Bass
+  //Spin
+    PipeSpin = PipeSpin+PipeRotationRate;
+   
+  // Saves each frame as screen-0001.tif, screen-0002.tif, etc.
+    if (DumpFrames == true) {
+      saveFrame("Dump/Synthesthesia-######.png");
+    }
 }
 
 //Note on event
@@ -467,7 +510,7 @@ void noteOn(int channel, int pitch, int velocity) {
   EnsembleChannelNoteOn();
   //BrassChannelNoteOn();
   //ReedChannelNoteOn();
-  //PipeChannelNoteOn();
+  PipeChannelNoteOn();
   //SynthLeadChannelNoteOn();
   //SynthPadChannelNoteOn();
   //SynthEffectsChannelNoteOn();
@@ -503,7 +546,7 @@ void noteOff(int channel, int pitch, int velocity) {
   EnsembleChannelNoteOff();
   //BrassChannelNoteOff();
   //ReedChannelNoteOff();
-  //PipeChannelNoteOff();
+  PipeChannelNoteOff();
   //SynthLeadChannelNoteOff();
   //SynthPadChannelNoteOff();
   //SynthEffectsChannelNoteOff();
@@ -570,7 +613,7 @@ void ColorTextures(){
     EnsembleNoteColor[i]            = loadImage("NoteColor_" + i + ".png");
     // BrassNoteColor[i]               = loadImage("NoteColor_" + i + ".png");
     // ReedNoteColor[i]                = loadImage("NoteColor_" + i + ".png");
-    // PipeNoteColor[i]                = loadImage("NoteColor_" + i + ".png");
+    PipeNoteColor[i]                = loadImage("NoteColor_" + i + ".png");
     // SynthLeadNoteColor[i]           = loadImage("NoteColor_" + i + ".png");
     // SynthPadNoteColor[i]            = loadImage("NoteColor_" + i + ".png");
     // SynthEffectsNoteColor[i]        = loadImage("NoteColor_" + i + ".png");
@@ -589,7 +632,6 @@ void ColorTexturesMasks(){
   BassMask                = loadImage("Mask-Bass.png");
   // BrassMask               = loadImage("Mask-Brass.png");
   // ReedMask                = loadImage("Mask-Reed.png");
-  // PipeMask                = loadImage("Mask-Pipe.png");
   // SynthLeadMask           = loadImage("Mask-SynthLead.png");
   // SynthPadMask            = loadImage("Mask-SynthPad.png");
   // SynthEffectsMask        = loadImage("Mask-SynthEffects.png");
@@ -602,6 +644,7 @@ void ColorTexturesMasks(){
     OrganMask[i]    = loadImage("Mask-Organ_"    + nf(i, 2) + ".png");
     StringsMask[i]  = loadImage("Mask-Strings_"  + nf(i, 2) + ".png");
     EnsembleMask[i] = loadImage("Mask-Ensemble_" + nf(i, 2) + ".png");
+    PipeMask[i]     = loadImage("Mask-Pipe_"     + nf(i, 2) + ".png");
   }
   
   //Colors
@@ -678,15 +721,14 @@ void OrganGFXDisplay(){
       {organgfx = new OrganGFX (
         OrganPitchX[i]        , //X coordinate 
         OrganVelocityY[i]     , //Y coordinate  
-        Depth+SineDepth[i]    , //Z coordinate  
-        PitchScaleX           , //Width  
-        PitchScaleY           , //Height  
-        VelocityScaleY        , //Depth    
-        PitchHues[i]          , //Hue  
-        OctaveSaturations[i]  , //Saturation    
-        OctaveBrightnesses[i] , //Brightness    
+        Depth+SineDepth[i]   , //Z coordinate  
+        OrganPitchWidth[i]    , //Width  
+        OrganPitchHeight[i]   , //Height  
+        VelocityScaleY       , //Depth    
+        PitchHues[i]         , //Hue  
+        OctaveSaturations[i] , //Saturation    
+        OctaveBrightnesses[i], //Brightness    
         OrganVelocityAlpha[i] , //Alpha  
-        OrganPitchThickness[i], //Thickness
         OrganNoteColor[i]    ); //Texture  
         organgfx.display()    ; //Display graphics 
       }
@@ -753,14 +795,13 @@ void StringsGFXDisplay(){
         StringsPitchX[i]        , //X coordinate 
         StringsVelocityY[i]     , //Y coordinate  
         Depth+SineDepth[i]      , //Z coordinate  
-        PitchScaleX             , //Width  
-        PitchScaleY             , //Height  
+        StringsPitchWidth[i]    , //Width  
+        StringsPitchHeight[i]   , //Height  
         VelocityScaleY          , //Depth    
         PitchHues[i]            , //Hue  
         OctaveSaturations[i]    , //Saturation    
         OctaveBrightnesses[i]   , //Brightness    
         StringsVelocityAlpha[i] , //Alpha  
-        StringsPitchThickness[i], //Thickness
         StringsNoteColor[i]    ); //Texture  
         stringsgfx.display()    ; //Display graphics 
       }
@@ -800,7 +841,7 @@ void EnsembleGFXDisplay(){
 //       {brassgfx = new BrassGFX (
 //         BrassPitchX[i]       , //X coordinate  
 //         BrassVelocityY[i]    , //Y coordinate   
-//         Depth+SineDepthm1    , //Z coordinate   
+//         Depth+SineDepth[i]    , //Z coordinate   
 //         VelocityScaleX       , //Width   
 //         VelocityScaleY       , //Height   
 //         VelocityScaleY       , //Depth      
@@ -823,7 +864,7 @@ void EnsembleGFXDisplay(){
 //       {reedgfx = new ReedGFX (
 //         ReedPitchX[i]       , //X coordinate  
 //         ReedVelocityY[i]    , //Y coordinate   
-//         Depth+SineDepthm1    , //Z coordinate   
+//         Depth+SineDepth[i]    , //Z coordinate   
 //         VelocityScaleX       , //Width   
 //         VelocityScaleY       , //Height   
 //         VelocityScaleY       , //Depth      
@@ -838,28 +879,29 @@ void EnsembleGFXDisplay(){
 //   }
 // }
 
-// //D#Pipe
-// void PipeGFXDisplay(){
-//   if (ChannelIsActive[PipeChannelID] == true) {
-//   for (int i = 0; i < 128; i++) {
-//     if (PipePitchIsActive[i] == true) 
-//       {pipegfx = new PipeGFX (
-//         PipePitchX[i]        , //X coordinate  
-//         PipeVelocityY[i]     , //Y coordinate   
-//         Depth+SineDepthm1    , //Z coordinate   
-//         VelocityScaleX       , //Width   
-//         VelocityScaleY       , //Height   
-//         VelocityScaleY       , //Depth      
-//         PitchHues[i]         , //Hue   
-//         OctaveSaturations[i] , //Saturation      
-//         OctaveBrightnesses[i], //Brightness      
-//         PipeVelocityAlpha[i] , //Alpha   
-//         PipeNoteColor[i]    ); //Texture   
-//         pipegfx.display()    ; //Display graphics 
-//       }
-//     }
-//   }
-// }
+//D#Pipe
+void PipeGFXDisplay(){
+  if (ChannelIsActive[PipeChannelID] == true) {
+  for (int i = 0; i < 128; i++) {
+    if (PipePitchIsActive[i] == true) 
+      {pipegfx = new PipeGFX (
+        PipePitchX[i]        , //X coordinate 
+        PipeVelocityY[i]     , //Y coordinate  
+        Depth+SineDepth[i]   , //Z coordinate  
+        PipePitchWidth[i]    , //Width  
+        PipePitchHeight[i]   , //Height  
+        VelocityScaleY       , //Depth    
+        PitchHues[i]         , //Hue  
+        OctaveSaturations[i] , //Saturation    
+        OctaveBrightnesses[i], //Brightness    
+        PipeVelocityAlpha[i] , //Alpha  
+        PipeNoteColor[i]     ,    
+        PipeSpin            ); //Texture  
+        pipegfx.display()    ; //Display graphics 
+      }
+    }
+  }
+}
 
 // //D#Synth Lead
 // void SynthLeadGFXDisplay(){
@@ -869,7 +911,7 @@ void EnsembleGFXDisplay(){
 //       {synthleadgfx = new SynthLeadGFX (
 //         SynthLeadPitchX[i]        , //X coordinate  
 //         SynthLeadVelocityY[i]     , //Y coordinate   
-//         Depth+SineDepthm1    , //Z coordinate   
+//         Depth+SineDepth[i]    , //Z coordinate   
 //         VelocityScaleX       , //Width   
 //         VelocityScaleY       , //Height   
 //         VelocityScaleY       , //Depth      
@@ -892,7 +934,7 @@ void EnsembleGFXDisplay(){
 //       {synthpadgfx = new SynthPadGFX (
 //         SynthPadPitchX[i]        , //X coordinate  
 //         SynthPadVelocityY[i]     , //Y coordinate   
-//         Depth+SineDepthm1    , //Z coordinate   
+//         Depth+SineDepth[i]    , //Z coordinate   
 //         VelocityScaleX       , //Width   
 //         VelocityScaleY       , //Height   
 //         VelocityScaleY       , //Depth      
@@ -915,7 +957,7 @@ void EnsembleGFXDisplay(){
 //       {ethnicgfx = new SynthEffectsGFX (
 //         SynthEffectsPitchX[i]        , //X coordinate  
 //         SynthEffectsVelocityY[i]     , //Y coordinate   
-//         Depth+SineDepthm1    , //Z coordinate   
+//         Depth+SineDepth[i]    , //Z coordinate   
 //         VelocityScaleX       , //Width   
 //         VelocityScaleY       , //Height   
 //         VelocityScaleY       , //Depth      
@@ -938,7 +980,7 @@ void EnsembleGFXDisplay(){
 //       {ethnicgfx = new EthnicGFX (
 //         EthnicPitchX[i]        , //X coordinate  
 //         EthnicVelocityY[i]     , //Y coordinate   
-//         Depth+SineDepthm1    , //Z coordinate   
+//         Depth+SineDepth[i]    , //Z coordinate   
 //         VelocityScaleX       , //Width   
 //         VelocityScaleY       , //Height   
 //         VelocityScaleY       , //Depth      
@@ -961,7 +1003,7 @@ void EnsembleGFXDisplay(){
 //       {percussivegfx = new PercussiveGFX (
 //         PercussivePitchX[i]        , //X coordinate  
 //         PercussiveVelocityY[i]     , //Y coordinate   
-//         Depth+SineDepthm1    , //Z coordinate   
+//         Depth+SineDepth[i]    , //Z coordinate   
 //         VelocityScaleX       , //Width   
 //         VelocityScaleY       , //Height   
 //         VelocityScaleY       , //Depth      
@@ -984,7 +1026,7 @@ void EnsembleGFXDisplay(){
 //       {percussiongfx = new PercussionGFX (
 //         PercussionPitchX[i]        , //X coordinate  
 //         PercussionVelocityY[i]     , //Y coordinate   
-//         Depth+SineDepthm1    , //Z coordinate   
+//         Depth+SineDepth[i]    , //Z coordinate   
 //         VelocityScaleX       , //Width   
 //         VelocityScaleY       , //Height   
 //         VelocityScaleY       , //Depth      
@@ -1038,7 +1080,8 @@ void EnsembleGFXDisplay(){
           OrganPitchX[i]         = map(Pitch, 0, 127, -width, width*2); 
           OrganVelocityY[i]      = map(Velocity, 0, 127, height, 0); 
           OrganVelocityAlpha[i]  = Velocity*2; 
-          OrganPitchThickness[i] = map(Pitch, 0, 127, 1, 0.125);
+          OrganPitchWidth[i]     = map(Pitch, 0, 127, 1,   0.015625);
+          OrganPitchHeight[i]    = map(Pitch, 0, 127, 0.5, 1.375);
         }
       }
     }
@@ -1083,7 +1126,8 @@ void EnsembleGFXDisplay(){
           StringsPitchX[i]         = map(Pitch, 0, 127, -width, width*2); 
           StringsVelocityY[i]      = map(Velocity, 0, 127, height, 0); 
           StringsVelocityAlpha[i]  = Velocity*2; 
-          StringsPitchThickness[i] = map(Pitch, 0, 127, 1, 0.125);
+          StringsPitchWidth[i]     = map(Pitch, 0, 127, 1,   0.125);
+          StringsPitchHeight[i]    = map(Pitch, 0, 127, 0.5, 1.375);
         }
       }
     }
@@ -1131,20 +1175,22 @@ void EnsembleGFXDisplay(){
   //     }
   //   }
   // }
-  // //N#Pipe
-  // void PipeChannelNoteOn(){
-  //   if (Channel == PipeChannelID) {
-  //     ChannelIsActive[PipeChannelID] = true;
-  //     for (int i = 0; i < 128; i++) {
-  //       if (Pitch == i) {
-  //         PipePitchIsActive[i] = true; 
-  //         PipePitchX[i]        = map(Pitch, 0, 127, -width, width*2); 
-  //         PipeVelocityY[i]     = map(Velocity, 0, 127, height, 0);  
-  //         PipeVelocityAlpha[i] = Velocity*2;
-  //       }
-  //     }
-  //   }
-  // }
+  //N#Pipe
+  void PipeChannelNoteOn(){
+    if (Channel == PipeChannelID) {
+      ChannelIsActive[PipeChannelID] = true;
+      for (int i = 0; i < 128; i++) {
+        if (Pitch == i) {
+          PipePitchIsActive[i]  = true; 
+          PipePitchX[i]         = map(Pitch, 0, 127, -width, width*2); 
+          PipeVelocityY[i]      = map(Velocity, 0, 127, height, 0); 
+          PipeVelocityAlpha[i]  = Velocity*2; 
+          PipePitchWidth[i]     = map(Pitch, 0, 127, 1,   0.015625);
+          PipePitchHeight[i]    = map(Pitch, 0, 127, 0.5, 1.375);
+        }
+      }
+    }
+  }
   // //N#Synth Lead
   // void SynthLeadChannelNoteOn(){
   //   if (Channel == SynthLeadChannelID) {
@@ -1321,16 +1367,16 @@ void EnsembleGFXDisplay(){
   //     }
   //   }
   // }
-  // //F#Pipe
-  // void PipeChannelNoteOff(){
-  //   if (Channel == PipeChannelID) {
-  //     for (int i = 0; i < 128; i++) {
-  //       if (Pitch == i) {
-  //         PipePitchIsActive[i] = false;
-  //       }
-  //     }
-  //   }
-  // }
+  //F#Pipe
+  void PipeChannelNoteOff(){
+    if (Channel == PipeChannelID) {
+      for (int i = 0; i < 128; i++) {
+        if (Pitch == i) {
+          PipePitchIsActive[i] = false;
+        }
+      }
+    }
+  }
   // //F#SynthLead
   // void SynthLeadChannelNoteOff(){
   //   if (Channel == SynthLeadChannelID) {
