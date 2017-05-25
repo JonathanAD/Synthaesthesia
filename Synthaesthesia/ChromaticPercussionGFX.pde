@@ -11,65 +11,62 @@ class ChromaticPercussionGFX {
   float CPA ;
   PImage CPT ;
   
-  ChromaticPercussionGFX (float ChromaticPercussionX, float ChromaticPercussionY, float ChromaticPercussionZ, float ChromaticPercussionWidth, float ChromaticPercussionHeight, float ChromaticPercussionDepth, float ChromaticPercussionHue, float ChromaticPercussionSaturation, float ChromaticPercussionBrightness, float ChromaticPercussionAlpha, PImage ChromaticPercussionTexture) {
-    CPX  = ChromaticPercussionX;
-    CPY  = ChromaticPercussionY;
-    CPZ  = ChromaticPercussionZ;
-    CPW  = ChromaticPercussionWidth;
-    CPH  = ChromaticPercussionHeight;
-    CPD  = ChromaticPercussionDepth;
-    CPHu = ChromaticPercussionHue;
-    CPS  = ChromaticPercussionSaturation;
-    CPB  = ChromaticPercussionBrightness;
-    CPA  = ChromaticPercussionAlpha;
-    CPT  = ChromaticPercussionTexture;
+  ChromaticPercussionGFX (
+    float ChromaticPercussionX, 
+    float ChromaticPercussionY, 
+    float ChromaticPercussionZ, 
+    float ChromaticPercussionWidth, 
+    float ChromaticPercussionHeight, 
+    float ChromaticPercussionDepth, 
+    float ChromaticPercussionHue, 
+    float ChromaticPercussionSaturation, 
+    float ChromaticPercussionBrightness, 
+    float ChromaticPercussionAlpha, 
+    PImage ChromaticPercussionTexture) {
+      CPX  = ChromaticPercussionX;
+      CPY  = ChromaticPercussionY;
+      CPZ  = ChromaticPercussionZ;
+      CPW  = ChromaticPercussionWidth;
+      CPH  = ChromaticPercussionHeight;
+      CPD  = ChromaticPercussionDepth;
+      CPHu = ChromaticPercussionHue;
+      CPS  = ChromaticPercussionSaturation;
+      CPB  = ChromaticPercussionBrightness;
+      CPA  = ChromaticPercussionAlpha;
+      CPT  = ChromaticPercussionTexture;
   }
   void display() {
+    //Setup
+    blendMode(ADD);  //Additive blending mode
+    
+    //Shapes
+    pushMatrix();  //Local transformation group
+      tint(CPHu, CPS, CPB, CPA); 
+      translate(CPX, (height/3)+CPY, -512+CPZ+CPA*DepthRate);
+      //Front face
+      beginShape();
+        texture(CPT);
+        vertex(-150, -600, 0, 0,   0);
+        vertex( 150, -600, 0, 512, 0);
+        vertex( 150,  600, 0, 512, 512);
+        vertex(-150,  600, 0, 0,   512);
+      endShape();
+    popMatrix();
+    
+    pushMatrix();  //Local transformation group
+      //Back face
+      tint(CPHu, CPS, CPB, CPA/3); 
+      translate(CPX, (height/3)+CPY, -1280-(CPZ+CPA*DepthRate));
+      beginShape();
+        texture(CPT);
+        vertex(-150, -600, -100, 0,   0);
+        vertex( 150, -600, -100, 512, 0);
+        vertex( 150,  600, -100, 512, 512);
+        vertex(-150,  600, -100, 0,   512);
+      endShape();
+    popMatrix();
 
-//Mask
-  //Blending mode
-  //Color
-  tint(255, 255, 255, CPA); 
-  //General translation
-  translate(CPX, CPY, CPZ);
-  
-  //Front face
-  beginShape();
-    texture(CPT);
-    vertex(-50, -200, 0, 0,   0);
-    vertex( 50, -200, 0, 512, 0);
-    vertex( 50,  200, 0, 512, 512);
-    vertex(-50,  200, 0, 0,   512);
-  endShape();
-  
-//  translate(0, 0, -100);
-//  beginShape();
-//    texture(CPT);
-//    vertex(-100, -100, 0, 0,   0);
-//    vertex( 100, -100, 0, 512, 0);
-//    vertex( 100,  100, 0, 512, 512);
-//    vertex(-100,  100, 0, 0,   512);
-//  endShape();
-//  translate(0, 0, 100);
-
-  beginShape();
-    texture(CPT);
-    vertex(-50, -200, -100, 0,   0);
-    vertex( 50, -200, -100, 512, 0);
-    vertex( 50,  200, -100, 512, 512);
-    vertex(-50,  200, -100, 0,   512);
-  endShape();
-  
-//  rotateX(radians(90));
-//  beginShape();
-//    texture(CPT);
-//    vertex(-100, -100, 0, 0,   0);
-//    vertex( 100, -100, 0, 512, 0);
-//    vertex( 100,  100, 0, 512, 512);
-//    vertex(-100,  100, 0, 0,   512);
-//  endShape();
-//  rotateX(radians(90));
-  
-  translate(-CPX, -CPY, -CPZ);
+    //Reset
+    blendMode(BLEND);
   }
 }

@@ -1,6 +1,6 @@
 class Debug {
   void framerate() {
-    println(frameRate); // Return framerate
+    println("Framerate: " + frameRate); // Return framerate
   }
   void clickToPrintVariables() {
      if (mousePressed == true) {
